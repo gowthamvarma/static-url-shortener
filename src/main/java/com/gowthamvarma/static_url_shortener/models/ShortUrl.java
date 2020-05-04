@@ -14,10 +14,15 @@ public class ShortUrl {
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private long id;
+	
 	private String name;
-	@Column(length = 512)
+	
+	@Column(length = 512,unique=true)
 	private String urlOriginal;
+	
+	@Column(unique=true)
 	private String urlShort;
+	
 	private int urlShortLength;
 	private String isActive;
 	private String dateCreated;
