@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Static URL Shortener</title>
+    <link rel="stylesheet" type="text/css" href="../jsgrid/demos.css" />
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300,600,400' rel='stylesheet' type='text/css'>
+
+    <link rel="stylesheet" type="text/css" href="../jsgrid/css/jsgrid.css" />
+    <link rel="stylesheet" type="text/css" href="../jsgrid/css/theme.css" />
+
+    <link rel="stylesheet" href="http://code.jquery.com/ui/1.11.2/themes/cupertino/jquery-ui.css">
+    <script src="http://code.jquery.com/jquery-1.10.2.js"></script>
+    <script src="http://code.jquery.com/ui/1.11.2/jquery-ui.js"></script>
+    <script src="http://ajax.aspnetcdn.com/ajax/jquery.validate/1.9/jquery.validate.min.js"></script>
+
+    <script src="../jsgrid/db.js"></script>
+
+    <script src="../jsgrid/src/jsgrid.core.js"></script>
+    <script src="../jsgrid/src/jsgrid.load-indicator.js"></script>
+    <script src="../jsgrid/src/jsgrid.load-strategies.js"></script>
+    <script src="../jsgrid/src/jsgrid.sort-strategies.js"></script>
+    <script src="../jsgrid/src/jsgrid.field.js"></script>
+    <script src="../jsgrid/src/fields/jsgrid.field.text.js"></script>
+    <script src="../jsgrid/src/fields/jsgrid.field.number.js"></script>
+    <script src="../jsgrid/src/fields/jsgrid.field.select.js"></script>
+    <script src="../jsgrid/src/fields/jsgrid.field.checkbox.js"></script>
+    <script src="../jsgrid/src/fields/jsgrid.field.control.js"></script>
+
+    <style>
+    
+    	.hasDatepicker {
+            width: 100px;
+            text-align: center;
+        }
+
+        .ui-datepicker * {
+            font-family: 'Helvetica Neue Light', 'Open Sans', Helvetica;
+            font-size: 14px;
+            font-weight: 300 !important;
+        }
+    
+    	.config-panel {
+            padding: 10px;
+            margin: 10px 0;
+            background: #fcfcfc;
+            border: 1px solid #e9e9e9;
+            display: inline-block;
+        }
+
+        .config-panel label {
+            margin-right: 10px;
+        }
+        
+        .ui-widget *, .ui-widget input, .ui-widget select, .ui-widget button {
+            font-family: 'Helvetica Neue Light', 'Open Sans', Helvetica;
+            font-size: 14px;
+            font-weight: 300 !important;
+        }
+
+        .details-form-field input,
+        .details-form-field select {
+            width: 250px;
+            float: right;
+        }
+
+        .details-form-field {
+            margin: 30px 0;
+        }
+
+        .details-form-field:first-child {
+            margin-top: 10px;
+        }
+
+        .details-form-field:last-child {
+            margin-bottom: 10px;
+        }
+
+        .details-form-field button {
+            display: block;
+            width: 100px;
+            margin: 0 auto;
+        }
+
+        input.error, select.error {
+            border: 1px solid #ff9999;
+            background: #ffeeee;
+        }
+
+        label.error {
+            float: right;
+            margin-left: 100px;
+            font-size: .8em;
+            color: #ff6666;
+        }
+    </style>
+</head>
+<body>
+    <h1>Static URL Shortener</h1>
+    
+    <div class="config-panel">
+        <!-- <label><input id="heading" type="checkbox" checked /> Heading</label>  -->
+        <label><input id="filtering" type="checkbox" checked /> Filtering</label>
+        <label><input id="inserting" type="checkbox" /> Inserting</label>
+        <label><input id="editing" type="checkbox" /> Editing</label>
+        <label><input id="paging" type="checkbox" checked /> Paging</label>
+        <label><input id="sorting" type="checkbox" checked /> Sorting</label>
+       <!--<label><input id="selecting" type="checkbox" checked /> Selecting</label>  -->
+	
+		<input id="url_len" type="number" value="3" />
+		<input id="url_short" type="text" />
+		<button id="url_gen" type="button">Generate</button>
+		<button id="url_dir_sync" type="button">Sync</button>
+		<button id="url_active_check" type="button">Active check</button>
+
+	</div>
+    
+    <div id="jsGrid"></div>
+
+    <script>
+        $(function() {
+        	
+        	$("#url_gen").click(function(){
+        		// avoiding 0 1 j k l o J K O
+        		var corpus = '23456789abcdefghimnpqrstuvwxyzABCDEFGHILMNPQRSTUVWXYZ';
+        		var result = '';
+        		var  url_len = parseInt($("#url_len").val());
+        		
+        		for (i = 0; i < url_len; i++) {
+        			// generate 0 to length
+        			var int_rand = Math.floor(Math.random() * corpus.length);
+        			result += corpus[int_rand];
+        		}
+        		
+        		$("#url_short").val(result);
+        		
+        		//alert("short url generated " + result);
+        		
+        	  /* Get the text field */
+       		  var copyText = document.getElementById("url_short");
+
+       		  /* Select the text field */
+       		  copyText.select();
+       		  copyText.setSelectionRange(0, 99999); /*For mobile devices*/
+
+       		  /* Copy the text inside the text field */
+       		  document.execCommand("copy");
+
+       		  /* Alert the copied text */
+       		  //alert("Copied the text: " + copyText.value);
+        	});
+        	
+        	$("#url_dir_sync").click(function(){
+        		//alert("sync");
+        		$.get("/short-url-sync", function(data, status){
+        		      alert("Data: " + data + "\nStatus: " + status);
+        		});
+        	});
+        	
+        	$("#url_active_check").click(function(){
+        		//alert("active check");
+        		$.get("/short-url-active-check", function(data, status){
+      		      alert("Data: " + data + "\nStatus: " + status);
+      			});
+        	});
+        	
+        	var MyDateField = function(config) {
+                jsGrid.Field.call(this, config);
+            };
+
+            MyDateField.prototype = new jsGrid.Field({
+                sorter: function(date1, date2) {
+                    return new Date(date1) - new Date(date2);
+                },
+
+                itemTemplate: function(value) {
+                    return new Date(value).toDateString();
+                },
+
+                insertTemplate: function(value) {
+                    return this._insertPicker = $("<input>").datepicker({ defaultDate: new Date() });
+                },
+
+                editTemplate: function(value) {
+                    return this._editPicker = $("<input>").datepicker().datepicker("setDate", new Date(value));
+                },
+
+                insertValue: function() {
+                    return this._insertPicker.datepicker("getDate").toISOString();
+                },
+
+                editValue: function() {
+                    return this._editPicker.datepicker("getDate").toISOString();
+                }
+            });
+
+            jsGrid.fields.myDateField = MyDateField;
+
+            $("#jsGrid").jsGrid({
+                height: "80%",
+                width: "100%",
+                filtering: true,
+                editing: false,
+                sorting: true,
+                paging: true,
+                autoload: true,
+                pageSize: 10,
+                pageButtonCount: 5,
+                deleteConfirm: function(item) {
+                    return "The client \"" + item.Name + "\" will be removed. Are you sure?";
+                },
+                controller: {
+                    loadData: function(filter) {
+                        return $.ajax({
+                            type: "GET",
+                            url: "/short-url",
+                            data: filter
+                        });
+                    },
+                    
+                    insertItem: function(item) {
+                        return $.ajax({
+                            type: "POST",
+                            url: "/short-url",
+                            data: item
+                        });
+                    },
+                    
+                    updateItem: function(item) {
+                        return $.ajax({
+                            type: "PUT",
+                            url: "/short-url",
+                            data: item
+                        });
+                    },
+                    
+                    deleteItem: function(item) {
+                        return $.ajax({
+                            type: "DELETE",
+                            url: "/short-url",
+                            data: item
+                        });
+                    },
+                },
+                fields: [
+                	{ name: "id", type: "number", width: 30 },
+                    { name: "name", type: "text", width: 50 },
+                    
+                    { name: "urlOriginal", type: "text", width: 100,
+                    	itemTemplate: function(value) {
+                            return '<a href="'+ value + '" target="_blank">link</a>'
+                        }	
+                    },
+                    { name: "urlShort", type: "text", width: 50,
+                    	itemTemplate: function(value) {
+                    		// TODO change to your website address
+                            return '<a href="https://www.supersaverindia.com/s/'+ value + '" target="_blank">'+ value + '</a>'
+                        }	
+                    },
+                    { name: "urlShortLength", type: "number", width: 40 },
+
+                    { name: "isActive", type: "select", width: 30, items: db.yesNo, valueField: "Id", textField: "Name" },
+                    
+                    { name: "dateCreated", type: "myDateField", width: 50 },
+                    { name: "dateExpiry", type: "myDateField", width: 50 },
+                    
+                    {
+                        type: "control",
+                        modeSwitchButton: false,
+                        editButton: false,
+                        headerTemplate: function() {
+                            return $("<button>").attr("type", "button").text("Add")
+                                .on("click", function () {
+                                    showDetailsDialog("Add", {});
+                                });
+                        }
+                    }
+                ]
+            });
+            
+            $(".config-panel input[type=checkbox]").on("click", function() {
+                var $cb = $(this);
+                $("#jsGrid").jsGrid("option", $cb.attr("id"), $cb.is(":checked"));
+            });
+
+        });
+    </script>
+</body>
+</html>
