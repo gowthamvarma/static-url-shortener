@@ -5,6 +5,9 @@ public class Config {
 	// true false
 	public static boolean DELETE_EXISTING_URL_FOLDERS = false;
 	
+	// true false
+	public static boolean COMMIT_GITHUB = false;
+	
 	//PATH_TEMPLATE = "E:\\test\\";
 	public static String PATH_TEMPLATE = "E:\\github\\static-site\\s\\index.html";
 	

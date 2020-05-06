@@ -98,6 +98,17 @@ public class StaticUrlShortenerService {
 	        }
 	        
 		}
+		
+		// java exec bat command
+		if(Config.COMMIT_GITHUB) {
+			try {
+	            String[] command = {"cmd.exe", "/C", "Start", "E:\\github\\static-site\\s\\commit.bat"};
+	            Process p =  Runtime.getRuntime().exec(command);           
+	        } catch (IOException ex) {
+	        	System.out.println("error in commiting code");
+	        }
+		}
+		
 	}
 
 	private void createFile(File template, File file, String urlOriginal) {
