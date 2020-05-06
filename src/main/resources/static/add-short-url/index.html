@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Add short URL</title>
+<style>
+input[type=text], select {
+  width: 100%;
+  padding: 12px 20px;
+  margin: 8px 0;
+  display: inline-block;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+input[type=number], select {
+  width: 100%;
+  padding: 12px 20px;
+  margin: 8px 0;
+  display: inline-block;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+input[type=date], select {
+  width: 100%;
+  padding: 12px 20px;
+  margin: 8px 0;
+  display: inline-block;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+input[type=submit] {
+  width: 100%;
+  background-color: #4CAF50;
+  color: white;
+  padding: 14px 20px;
+  margin: 8px 0;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+button {
+  background-color: #4CAF50;
+  color: white;
+  padding: 14px 20px;
+  margin: 8px 8px 8px 8px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+
+input[type=submit]:hover {
+  background-color: #45a049;
+}
+
+div {
+  border-radius: 5px;
+  background-color: #f2f2f2;
+  padding: 20px;
+}
+</style>
+
+<link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+<link rel="stylesheet" href="/resources/demos/style.css">
+<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
+<script>
+$( function() {
+  $( "#dateCreated" ).datepicker();
+  $( "#dateExpiry" ).datepicker();
+  
+  $( "#dateCreated" ).datepicker({dateFormat:"mm/dd/yyyy"}).datepicker("setDate",new Date());
+  $( "#dateExpiry" ).datepicker({dateFormat:"mm/dd/yyyy"}).datepicker("setDate",new Date());
+  
+  
+  $("#url_gen").click(function(){
+		// avoiding 0 1 j k l o J K O
+		var corpus = '23456789abcdefghimnpqrstuvwxyzABCDEFGHILMNPQRSTUVWXYZ';
+		var result = '';
+		var  url_len = parseInt($("#urlShortLength").val());
+		
+		for (i = 0; i < url_len; i++) {
+			// generate 0 to length
+			var int_rand = Math.floor(Math.random() * corpus.length);
+			result += corpus[int_rand];
+		}
+		
+		$("#urlShort").val(result);
+	});
+	
+	$("#url_dir_sync").click(function(){
+		//alert("sync");
+		$.get("/short-url-sync", function(data, status){
+		      alert("Data: " + data + "\nStatus: " + status);
+		});
+	});
+	
+	$("#test_urlOriginal").click(function(){
+		 var url = $("#urlOriginal").val();
+		 window.open(url, '_blank');
+	});
+	
+	$("#test_urlShort").click(function(){
+		 var url = 'https://www.supersaverindia.com/s/' + $("#urlShort").val();
+		 window.open(url, '_blank');
+	});
+  
+} );
+</script>
+
+</head>
+<body>
+
+<h3>Add short URL</h3> 
+
+<button id="url_gen" type="button">Generate</button>
+<button id="url_dir_sync" type="button">Sync</button>
+
+<button id="test_urlOriginal" type="button">Long</button>
+<button id="test_urlShort" type="button">Short</button>
+
+<div>
+  <form action="/short-url" method="post">
+    <label for="name">name</label>
+    <input type="text" id="name" name="name" required placeholder="">
+
+    <label for="urlOriginal">urlOriginal</label>
+    <input type="text" id="urlOriginal" name="urlOriginal" required placeholder="">
+    
+    <label for="urlShort">urlShort</label>
+    <input type="text" id="urlShort" name="urlShort" required placeholder="">
+    
+    <label for="urlShortLength">urlShort</label>
+    <input type="number" id="urlShortLength" name="urlShortLength" value="3">
+    
+    <label for="isActive">isActive</label>
+    <select id="isActive" name="isActive">
+      <option value=""></option>
+      <option value="Y" selected>Yes</option>
+      <option value="N">No</option>
+    </select>
+    
+    <label for="dateCreated">dateCreated</label>
+    <input type="text" id="dateCreated" name="dateCreated" placeholder="">
+    
+    <label for="dateExpiry">dateExpiry</label>
+    <input type="text" id="dateExpiry" name="dateExpiry" placeholder="">
+  
+    <input type="submit" value="Submit">
+  </form>
+</div>
+
+</body>
+</html>

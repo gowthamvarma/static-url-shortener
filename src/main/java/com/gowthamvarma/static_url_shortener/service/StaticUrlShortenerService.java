@@ -15,6 +15,7 @@ import java.util.stream.StreamSupport;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.gowthamvarma.static_url_shortener.config.Config;
 import com.gowthamvarma.static_url_shortener.models.ShortUrl;
 import com.gowthamvarma.static_url_shortener.repo.StaticUrlShortenerRepository;
 
@@ -71,28 +72,27 @@ public class StaticUrlShortenerService {
 	}
 
 	public void syncUrls() {
-		String localSyncPath = "E:\\github\\static-site\\s\\";
-		//localSyncPath = "E:\\test\\";
-		String templatePath = "E:\\github\\static-site\\s\\index.html";
-		boolean deleteExisting = true;
+		String localSyncPath = Config.PATH_LOCAL_SYNC;
+		String templatePath = Config.PATH_TEMPLATE;
+		boolean deleteExisting = Config.DELETE_EXISTING_URL_FOLDERS;
 		
 		Iterable<ShortUrl> iterable = repo.findAll();
 		for (ShortUrl shortUrl : iterable) {
 			// check if file exists
 			// Get the file 
-	        File file = new File(localSyncPath + shortUrl.getUrlShort() + "\\index.html"); 
+	        File file = new File(localSyncPath + shortUrl.getUrlShort() + Config.INDEX_HTML); 
 	        File template = new File(templatePath); 
 
 	        if (file.exists()) {
-	            System.out.println("Exists");
+	            System.out.println("Folder exists");
 	        	// if file is present delete and create file if deleteExisting is true
 	        	if(deleteExisting) {
-	        		System.out.println("Delete");
+	        		System.out.println("Deleting folder");
 	        		file.delete();
 	        		createFile(template,file,shortUrl.getUrlOriginal());
 	        	}
 	        } else {
-	        	System.out.println("Does not Exists"); 
+	        	System.out.println("Folder doesn't exist"); 
 	        	// if file is not present create file
 	        	createFile(template,file,shortUrl.getUrlOriginal());
 	        }
@@ -112,7 +112,7 @@ public class StaticUrlShortenerService {
 		try {
 			Path path = Paths.get(file.getAbsolutePath());
 			Stream<String> lines = Files.lines(path);
-			List<String> replaced = lines.map(line -> line.replaceAll("url_to_replace", urlOriginal))
+			List<String> replaced = lines.map(line -> line.replaceAll(Config.URL_TO_REPLACE, urlOriginal))
 					.collect(Collectors.toList());
 			Files.write(path, replaced);
 			lines.close();
